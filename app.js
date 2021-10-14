@@ -50,7 +50,8 @@ class Sketch {
 
    //creating shaders
   addObjects() {
-    this.geometry = new THREE.PlaneBufferGeometry(.7, .7, 150, 150);
+    this.geometry = new THREE.PlaneBufferGeometry(1, 1, 40, 40);
+    this.geometry = new THREE.SphereBufferGeometry(0.4,40, 40);
     this.material = new THREE.MeshNormalMaterial();
 
     //this shader material has couple of options
@@ -62,7 +63,7 @@ class Sketch {
       side: THREE.DoubleSide,
       fragmentShader: fragment,
       vertexShader: vertex,
-      // wireframe: true,
+      wireframe: true,
     });
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
