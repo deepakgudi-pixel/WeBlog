@@ -57,9 +57,13 @@ class Sketch {
 
   addImages() {
     this.imgCollection = this.images.map((img)=>{
-      let bounds = img.getBoundingClientRect()
+      let bounds = img.getBoundingClientRect();
+
       let geometry = new THREE.PlaneBufferGeometry(bounds.width, bounds.height,1,1);
-      let material = new THREE.MeshBasicMaterial({color: 0xff0000});
+      let texture = new THREE.Texture(img);
+      texture.needsUpdate = true;
+      let material = new THREE.MeshBasicMaterial({map: texture});
+      
       let mesh = new THREE.Mesh(geometry, material);
 
       this.scene.add(mesh);
@@ -76,7 +80,7 @@ class Sketch {
   }
 
   setPosition(){
-    this.imgCollection.forEach(img => {
+      this.imgCollection.forEach(img => {
       img.mesh.position.y = -img.top + this.height/2 - img.height/2;
       img.mesh.position.x = img.left - this.width/2 + img.width/2;
     })
