@@ -23,7 +23,7 @@ class Sketch {
     );
     this.camera.position.z = 1;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
     this.container.appendChild(this.renderer.domElement);
 
@@ -51,7 +51,7 @@ class Sketch {
    //creating shaders
   addObjects() {
     this.geometry = new THREE.PlaneBufferGeometry(1, 1, 40, 40);
-    this.geometry = new THREE.SphereBufferGeometry(0.4,40, 40);
+    // this.geometry = new THREE.SphereBufferGeometry(0.4,40, 40);
     this.material = new THREE.MeshNormalMaterial();
 
     //this shader material has couple of options
