@@ -23,7 +23,7 @@ class Sketch {
     );
     this.camera.position.z = 600;
 
-    this.camera.fov = 2*Math.atan(( this.height / 2) / 600 )*(180/Math.PI);//merging dimensions of threeJs and browser screen
+    this.camera.fov = 2*Math.atan(( this.height / 2) / 600 )*(180/Math.PI); //merging dimensions of threeJs and browser screen
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
@@ -38,7 +38,7 @@ class Sketch {
     this.setPosition();
     this.resize();
     this.setupResize();
-    this.addObjects();
+    // this.addObjects();
     this.render();
   }
 
@@ -56,6 +56,14 @@ class Sketch {
   }
 
   addImages() {
+
+    this.currentScroll = 0;
+
+    window.addEventListener("scroll", ()=>{
+      this.currentScroll= window.scrollY;
+      this.setPosition();
+    })
+
     this.imgCollection = this.images.map((img)=>{
       let bounds = img.getBoundingClientRect();
 
@@ -78,10 +86,10 @@ class Sketch {
        }
     })
   }
-
+  //postioning the image in threejs
   setPosition(){
       this.imgCollection.forEach(img => {
-      img.mesh.position.y = -img.top + this.height/2 - img.height/2;
+      img.mesh.position.y = this.currentScroll -img.top + this.height/2 - img.height/2;
       img.mesh.position.x = img.left - this.width/2 + img.width/2;
     })
   }
@@ -110,10 +118,10 @@ class Sketch {
 
   render() {
     this.time += 0.05;
-    this.mesh.rotation.x = this.time / 2000;
-    this.mesh.rotation.y = this.time / 1000;
+    // this.mesh.rotation.x = this.time / 2000;
+    // this.mesh.rotation.y = this.time / 1000;
 
-    this.material.uniforms.time.value = this.time;
+    // this.material.uniforms.time.value = this.time;
 
     this.renderer.render(this.scene, this.camera);
     window.requestAnimationFrame(this.render.bind(this));
