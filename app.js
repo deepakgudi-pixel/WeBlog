@@ -2,7 +2,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.133.1";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.133.1/examples/jsm/controls/OrbitControls.js";
 import fragment from "./shaders/fragment.glsl.js";
 import vertex  from "./shaders/vertex.glsl.js";
-// import girl from "./img/girl.jpeg";
+import Scroll from "./scroll.js";
+
 
 class Sketch {
   constructor(options) {
@@ -59,10 +60,11 @@ class Sketch {
 
     this.currentScroll = 0;
 
-    window.addEventListener("scroll", ()=>{
-      this.currentScroll= window.scrollY;
-      this.setPosition();
-    })
+    // window.addEventListener("scroll", ()=>{
+    //   this.currentScroll= window.scrollY;
+    //   this.setPosition();
+    // })
+    this.scroll = new Scroll();
 
     this.imgCollection = this.images.map((img)=>{
       let bounds = img.getBoundingClientRect();
@@ -118,6 +120,10 @@ class Sketch {
 
   render() {
     this.time += 0.05;
+
+    this.scroll.render();
+    this.currentScroll = this.scroll.scrollToRender;
+    this.setPosition();
     // this.mesh.rotation.x = this.time / 2000;
     // this.mesh.rotation.y = this.time / 1000;
 
