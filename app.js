@@ -23,7 +23,7 @@ class Sketch {
     );
     this.camera.position.z = 600;
 
-    this.camera.fov = 2*Math.atan(( this.height / 2) / 600 )*(180/Math.PI);
+    this.camera.fov = 2*Math.atan(( this.height / 2) / 600 )*(180/Math.PI);//merging dimensions of threeJs and browser screen
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
@@ -31,6 +31,11 @@ class Sketch {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+    //get the details of the images
+    this.images =[...document.querySelectorAll("img")];
+
+    this.addImages();
+    this.setPosition();
     this.resize();
     this.setupResize();
     this.addObjects();
@@ -48,6 +53,33 @@ class Sketch {
     this.camera.aspect = this.width / this.height;
     //we are saying the viewport has changed and resize based on vieport
     this.camera.updateProjectionMatrix();
+  }
+
+  addImages() {
+    this.imgCollection = this.images.map((img)=>{
+      let bounds = img.getBoundingClientRect()
+      let geometry = new THREE.PlaneBufferGeometry(bounds.width, bounds.height,1,1);
+      let material = new THREE.MeshBasicMaterial({color: 0xff0000});
+      let mesh = new THREE.Mesh(geometry, material);
+
+      this.scene.add(mesh);
+
+       return{
+         img: img,
+         mesh: mesh,
+         top: bounds.top,
+         left: bounds.left,
+         width: bounds.width,
+         height: bounds.height
+       }
+    })
+  }
+
+  setPosition(){
+    this.imgCollection.forEach(img => {
+      img.mesh.position.y = -img.top + this.height/2 - img.height/2;
+      img.mesh.position.x = img.left - this.width/2 + img.width/2;
+    })
   }
 
    //creating shaders
