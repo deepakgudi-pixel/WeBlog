@@ -16,6 +16,18 @@ canvas {
   display: block;
 }
 
+*::-webkit-scrollbar {
+  width: 0.25rem;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: white;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .intro {
   background: #000;
   position: fixed;
