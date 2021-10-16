@@ -35,14 +35,52 @@ class Sketch {
     //get the details of the images
     this.images =[...document.querySelectorAll("img")];
 
+     //scroll 
+    // window.addEventListener("scroll", ()=>{
+    //   this.currentScroll= window.scrollY;
+    //   this.setPosition();
+    // })
+
+    this.currentScroll = 0;
+    this.scroll = new Scroll();
+
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+
+   
     this.addImages();
     this.setPosition();
+    this.mouseMovement();
     this.resize();
     this.setupResize();
     // this.addObjects();
     this.render();
   }
 
+  mouseMovement() {
+
+    window.addEventListener("mousemove", (event)=>{
+      this.mouse.x = ( event.clientX / this.width) * 2 - 1;
+	    this.mouse.y = - ( event.clientY / this.height ) * 2 + 1;
+     
+    // update the picking ray with the camera and mouse position
+	  this.raycaster.setFromCamera( this.mouse, this.camera );
+
+	 // calculate objects intersecting the picking ray
+	 const intersects = this.raycaster.intersectObjects( this.scene.children );
+ 
+   if(intersects.length> 0){
+    //  console.log(intersects[0]);
+     let obj = intersects[0].object;
+     obj.material.uniforms.hover.value = intersects[0].uv;
+   }
+
+
+
+    }, false);
+    
+  }
+  
   setupResize() {
     window.addEventListener("resize", this.resize.bind(this));
   }
@@ -57,25 +95,51 @@ class Sketch {
   }
 
   addImages() {
+    this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: {value: 0},
+        uImage: {value: 0},
+        hover: {value: new THREE.Vector2(0.5, 0.5)},
+        hoverState: {value: 0},
+      },
+      side: THREE.DoubleSide,
+      fragmentShader: fragment,
+      vertexShader: vertex,
+      // wireframe: true,
+    });
 
-    this.currentScroll = 0;
+      this.materials = [];
 
-    this.scroll = new Scroll();
-    
-    // window.addEventListener("scroll", ()=>{
-    //   this.currentScroll= window.scrollY;
-    //   this.setPosition();
-    // })
-  
-
-    this.imgCollection = this.images.map((img)=>{
+      this.imgCollection = this.images.map((img)=>{
       let bounds = img.getBoundingClientRect();
 
-      let geometry = new THREE.PlaneBufferGeometry(bounds.width, bounds.height,1,1);
+      let geometry = new THREE.PlaneBufferGeometry(bounds.width, bounds.height,10,10);
       let texture = new THREE.Texture(img);
       texture.needsUpdate = true;
-      let material = new THREE.MeshBasicMaterial({map: texture});
+      // let material = new THREE.MeshBasicMaterial({map: texture});
       
+      let material = this.material.clone();
+
+      img.addEventListener("mouseenter", ()=>{
+           gsap.to(material.uniforms.hoverState,{
+             duration:1,
+             value: 1,
+           })
+      })
+
+      img.addEventListener("mouseout", ()=>{
+         gsap.to(material.uniforms.hoverState,{
+           duration: 1,
+           value: 0,
+         })
+      })
+
+
+
+      this.materials.push(material);
+     
+      material.uniforms.uImage.value = texture;
+
       let mesh = new THREE.Mesh(geometry, material);
 
       this.scene.add(mesh);
@@ -108,7 +172,6 @@ class Sketch {
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         time: {value: 0},
-        picTexture: {value: new THREE.TextureLoader().load("https://images.pexels.com/photos/2690323/pexels-photo-2690323.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260")},
       },
       side: THREE.DoubleSide,
       fragmentShader: fragment,
@@ -130,6 +193,10 @@ class Sketch {
     // this.mesh.rotation.y = this.time / 1000;
 
     // this.material.uniforms.time.value = this.time;
+
+    this.materials.forEach(m=>{
+      m.uniforms.time.value = this.time;
+    });
 
     this.renderer.render(this.scene, this.camera);
     window.requestAnimationFrame(this.render.bind(this));
