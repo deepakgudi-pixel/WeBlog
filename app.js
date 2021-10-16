@@ -1,5 +1,13 @@
 import * as THREE from "https://cdn.skypack.dev/three@0.133.1";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.133.1/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from 'https://cdn.skypack.dev/three@0.133.1/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.skypack.dev/three@0.133.1/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'https://cdn.skypack.dev/three@0.133.1/examples/jsm/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.133.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+
+
+
 import fragment from "./shaders/fragment.glsl.js";
 import vertex  from "./shaders/vertex.glsl.js";
 import Scroll from "./scroll.js";
@@ -54,9 +62,60 @@ class Sketch {
     this.resize();
     this.setupResize();
     // this.addObjects();
+    this.composerPass();
     this.render();
   }
 
+  //post processing
+  composerPass(){
+    this.composer = new EffectComposer(this.renderer);
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.renderPass);
+
+    //custom shader pass
+    var counter = 0.0;
+    this.myEffect = {
+      uniforms: {
+        "tDiffuse": { value: null },
+        "scrollSpeed": { value: null },
+
+      },
+      vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix 
+          * modelViewMatrix 
+          * vec4( position, 1.0 );
+      }
+      `,
+      fragmentShader: `
+      uniform sampler2D tDiffuse;
+      varying vec2 vUv;
+
+      uniform float scrollSpeed;
+
+
+      void main(){
+
+        vec2 newUV = vUv;
+        float area = smoothstep(0.4,0.,vUv.y);
+        area = pow(area, 4.);  
+        newUV.x -= (vUv.x - 0.5) * 0.1 * area * scrollSpeed ;
+        
+        gl_FragColor = texture2D( tDiffuse, newUV);
+
+      }
+      `
+    }
+
+    this.customPass = new ShaderPass(this.myEffect);
+    this.customPass.renderToScreen = true;
+    
+    this.composer.addPass(this.customPass);
+  }
+
+  //mouse movement
   mouseMovement() {
 
     window.addEventListener("mousemove", (event)=>{
@@ -189,16 +248,14 @@ class Sketch {
     this.scroll.render();
     this.currentScroll = this.scroll.scrollToRender;
     this.setPosition();
-    // this.mesh.rotation.x = this.time / 2000;
-    // this.mesh.rotation.y = this.time / 1000;
-
-    // this.material.uniforms.time.value = this.time;
+    this.customPass.uniforms.scrollSpeed.value = this.scroll.speedTarget;  
 
     this.materials.forEach(m=>{
       m.uniforms.time.value = this.time;
     });
 
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
+    this.composer.render();
     window.requestAnimationFrame(this.render.bind(this));
   }
 }

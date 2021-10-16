@@ -45,8 +45,8 @@ h1 {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: #ffdcdc;
-  mix-blend-mode: luminosity;
+  color: #ffffff;
+  mix-blend-mode: difference;
   font-size: 18vw;
 }
 header img {
