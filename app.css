@@ -85,10 +85,7 @@ canvas {
 }
 /* header */
 
-header {
-  margin-bottom: 5em;
-  position: relative;
-}
+
 h1 {
   font-size: 260px;
   line-height: 1;
